@@ -1,0 +1,15 @@
+http:
+  routers:
+    homeassistant:
+      rule: 'Host(`ha.{{ env "DOMAIN" }}`)'
+      entryPoints:
+        - "websecure"
+      tls:
+        certResolver: "dnsimple"
+      service: "homeassistant"
+  services:
+    homeassistant:
+      loadBalancer:
+        servers:
+          - url: 'http://{{ env "HOME_ASSISTANT_IP" }}:8123'
+        passHostHeader: true
