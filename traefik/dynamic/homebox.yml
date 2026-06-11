@@ -1,0 +1,14 @@
+http:
+  routers:
+    homebox:
+      rule: 'Host(`homebox.{{ env "DOMAIN" }}`)'
+      entryPoints:
+        - "websecure"
+      tls:
+        certResolver: "dnsimple"
+      service: "homebox"
+  services:
+    homebox:
+      loadBalancer:
+        servers:
+          - url: 'http://homebox:3100'
