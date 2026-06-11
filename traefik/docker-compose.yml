@@ -1,0 +1,52 @@
+networks:
+  proxy:
+    external: true
+
+services:
+  traefik:
+    image: traefik:v3.7.5
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # ── Entry points ──
+      TRAEFIK_ENTRYPOINTS_WEB_ADDRESS: ":80"
+      TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_TO: websecure
+      TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_SCHEME: https
+      TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_PERMANENT: "true"
+      TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS: ":443"
+      # ── Providers ──
+      TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT: "false"
+      TRAEFIK_PROVIDERS_DOCKER_NETWORK: proxy
+      TRAEFIK_PROVIDERS_FILE_DIRECTORY: /etc/traefik/dynamic
+      TRAEFIK_PROVIDERS_FILE_WATCH: "true"
+      # ── Certificate resolver ──
+      TRAEFIK_CERTIFICATESRESOLVERS_DNSIMPLE_ACME_EMAIL: ${ACME_EMAIL}
+      TRAEFIK_CERTIFICATESRESOLVERS_DNSIMPLE_ACME_STORAGE: /acme.json
+      # TRAEFIK_CERTIFICATESRESOLVERS_DNSIMPLE_ACME_CASERVER: https://acme-v02.api.letsencrypt.org/directory
+      TRAEFIK_CERTIFICATESRESOLVERS_DNSIMPLE_ACME_CASERVER: https://acme-staging-v02.api.letsencrypt.org/directory
+      TRAEFIK_CERTIFICATESRESOLVERS_DNSIMPLE_ACME_DNSCHALLENGE_PROVIDER: dnsimple
+      TRAEFIK_CERTIFICATESRESOLVERS_DNSIMPLE_ACME_DNSCHALLENGE_DELAYBEFORECHECK: "30"
+      TRAEFIK_CERTIFICATESRESOLVERS_DNSIMPLE_ACME_DNSCHALLENGE_RESOLVERS: "1.1.1.1:53,8.8.8.8:53"
+      # ── DNSimple token ──
+      DNSIMPLE_OATH_TOKEN: ${DNSIMPLE_OAUTH_TOKEN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./acme.json:/acme.json
+      - ./dynamic:/etc/traefik/dynamic:ro
+    networks:
+      - proxy
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.traefik.rule: "Host(`traefik.${DOMAIN}`)"
+      traefik.http.routers.traefik.entryPoints: "websecure"
+      traefik.http.routers.traefik.tls.certResolver: "dnsimple"
+      traefik.http.routers.traefik.service: "api@internal"
+      # Protect the dashboard with basic auth
+      traefik.http.middlewares.traefik-auth.basicauth.users: "${TRAEFIK_DASH_HASH}"
+      traefik.http.routers.traefik.middlewares: "traefik-auth"
