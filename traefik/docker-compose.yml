@@ -36,7 +36,6 @@ services:
       DNSIMPLE_OATH_TOKEN: ${DNSIMPLE_OAUTH_TOKEN}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik.yml:/etc/traefik/traefik.yml:ro
       - ./acme.json:/acme.json
       - ./dynamic:/etc/traefik/dynamic:ro
     networks:
