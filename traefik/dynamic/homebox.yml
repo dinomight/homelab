@@ -11,4 +11,4 @@ http:
     homebox:
       loadBalancer:
         servers:
-          - url: 'http://homebox:3100'
+          - url: 'http://homebox:7745'
