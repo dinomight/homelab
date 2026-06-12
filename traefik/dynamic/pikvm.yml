@@ -1,0 +1,19 @@
+http:
+  routers:
+    pikvm:
+      rule: 'Host(`pikvm.{{ env "DOMAIN" }}`)'
+      entryPoints:
+        - "websecure"
+      tls:
+        certResolver: "dnsimple"
+      service: "pikvm"
+  services:
+    pikvm:
+      loadBalancer:
+        servers:
+          - url: 'https://{{ env "PIKVM_IP" }}'
+        passHostHeader: true
+        serversTransport: pikvm-transport
+  serversTransports:
+    pikvm-transport:
+      insecureSkipVerify: true
