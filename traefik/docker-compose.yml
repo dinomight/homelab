@@ -40,6 +40,7 @@ services:
       # ── Custom environment variables for dynamic configuration ──
       DOMAIN: ${DOMAIN}
       HOME_ASSISTANT_IP: ${HOME_ASSISTANT_IP}
+      PIKVM_IP: ${PIKVM_IP}
       TRUENAS_IP: ${TRUENAS_IP}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
