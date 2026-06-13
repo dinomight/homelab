@@ -1,0 +1,39 @@
+services:
+  broker:
+    image: docker.io/library/redis:8.8.0
+    restart: unless-stopped
+    volumes:
+      - ${DATA_DIR}/redis:/data
+  db:
+    image: docker.io/library/postgres:18.4
+    restart: unless-stopped
+    volumes:
+      - ${DATA_DIR}/postgresql:/var/lib/postgresql
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:2.20.15
+    restart: unless-stopped
+    container_name: paperless
+    depends_on:
+      - db
+      - broker
+    volumes:
+      - ${DATA_DIR}/paperless/data:/usr/src/paperless/data
+      - ${DATA_DIR}/paperless/media:/usr/src/paperless/media
+      - ${DATA_DIR}/paperless/export:/usr/src/paperless/export
+      - ${DATA_DIR}/paperless/consume:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_URL: https://docs.${DOMAIN}
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
+      PAPERLESS_OCR_LANGUAGE: eng
+      PAPERLESS_TIME_ZONE: ${PAPERLESS_TIME_ZONE}
+    networks:
+      - proxy
+networks:
+  proxy:
+    external: true

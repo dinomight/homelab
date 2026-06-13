@@ -1,0 +1,14 @@
+http:
+  routers:
+    paperless:
+      rule: 'Host(`docs.{{ env "DOMAIN" }}`)'
+      entryPoints:
+        - "websecure"
+      tls:
+        certResolver: "dnsimple"
+      service: "paperless"
+  services:
+    paperless:
+      loadBalancer:
+        servers:
+          - url: 'http://paperless:8000'
