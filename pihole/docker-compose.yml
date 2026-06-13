@@ -10,6 +10,7 @@ services:
     environment:
       TZ: '${TIME_ZONE}'
       FTLCONF_webserver_api_password: '${PIHOLE_PASSWORD}'
+      FTLCONF_webserver_domain: 'pihole.${DOMAIN}'
       FTLCONF_dns_listeningMode: 'ALL'
     volumes:
       - ${DATA_DIR}:/etc/pihole
