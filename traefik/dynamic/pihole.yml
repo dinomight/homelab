@@ -1,0 +1,14 @@
+http:
+  routers:
+    pihole:
+      rule: 'Host(`pihole.{{ env "DOMAIN" }}`)'
+      entryPoints:
+        - "websecure"
+      tls:
+        certResolver: "dnsimple"
+      service: "pihole"
+  services:
+    pihole:
+      loadBalancer:
+        servers:
+          - url: 'http://pihole'
