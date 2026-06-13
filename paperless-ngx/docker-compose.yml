@@ -1,18 +1,26 @@
 services:
   broker:
     image: docker.io/library/redis:8.8.0
+    container_name: paperless-broker
     restart: unless-stopped
     volumes:
       - ${DATA_DIR}/redis:/data
+    networks:
+      - internal
+
   db:
     image: docker.io/library/postgres:18.4
+    container_name: paperless-db
     restart: unless-stopped
     volumes:
       - ${DATA_DIR}/postgresql:/var/lib/postgresql
     environment:
       POSTGRES_DB: paperless
       POSTGRES_USER: paperless
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: paperless
+    networks:
+      - internal
+
   webserver:
     image: ghcr.io/paperless-ngx/paperless-ngx:2.20.15
     restart: unless-stopped
@@ -21,10 +29,10 @@ services:
       - db
       - broker
     volumes:
-      - ${DATA_DIR}/paperless/data:/usr/src/paperless/data
-      - ${DATA_DIR}/paperless/media:/usr/src/paperless/media
-      - ${DATA_DIR}/paperless/export:/usr/src/paperless/export
-      - ${DATA_DIR}/paperless/consume:/usr/src/paperless/consume
+      - ${DATA_DIR}/data:/usr/src/paperless/data
+      - ${DATA_DIR}/media:/usr/src/paperless/media
+      - ${DATA_DIR}/export:/usr/src/paperless/export
+      - ${DATA_DIR}/consume:/usr/src/paperless/consume
     environment:
       PAPERLESS_REDIS: redis://broker:6379
       PAPERLESS_DBHOST: db
@@ -33,7 +41,10 @@ services:
       PAPERLESS_OCR_LANGUAGE: eng
       PAPERLESS_TIME_ZONE: ${PAPERLESS_TIME_ZONE}
     networks:
+      - internal
       - proxy
 networks:
+  internal:
+    driver: bridge
   proxy:
     external: true
