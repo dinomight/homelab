@@ -1,0 +1,33 @@
+services:
+  arm:
+    image: automaticrippingmachine/automatic-ripping-machine:2.23.3
+    container_name: automatic-ripping-machine
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/sr0:/dev/sr0
+      - /dev/sr1:/dev/sr1
+      - /dev/sr2:/dev/sr2
+      - /dev/sg1:/dev/sg1
+      - /dev/sg2:/dev/sg2
+      - /dev/sg3:/dev/sg3
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu, video]
+    volumes:
+      - ./home:/home/arm
+      - ./config:/etc/arm/config
+      - ./logs:/home/arm/logs
+      - ${DATA_DIR}/rips:/home/arm/media
+      - ${DATA_DIR}/music:/home/arm/music
+      - ${DATA_DIR}/.dvdcss:/root/.dvdcss
+    environment:
+      - ARM_UID=1000
+      - ARM_GID=1000
+      - TZ=${ARM_TIMEZONE}
+    ports:
+      - "8080:8080"
