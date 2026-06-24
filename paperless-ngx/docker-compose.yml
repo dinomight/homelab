@@ -43,6 +43,70 @@ services:
     networks:
       - internal
       - proxy
+
+  backup:
+    image: mazzolino/restic:1.8.2
+    container_name: paperless-backup
+    restart: unless-stopped
+    volumes:
+      - ${DATA_DIR}/data:/data:ro
+      - ${DATA_DIR}/media:/media:ro
+      - ${RESTIC_DATA_DIR}/paperless:/root/.cache/restic
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      BACKUP_CRON: "0 0 2 * * *"
+      RUN_ON_STARTUP: "true"
+
+      RESTIC_REPOSITORY: b2:${B2_BUCKET_NAME}
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+      B2_ACCOUNT_ID: ${B2_ACCOUNT_ID}
+      B2_ACCOUNT_KEY: ${B2_ACCOUNT_KEY}
+
+      RESTIC_BACKUP_SOURCES: /data /dumps /media
+      RESTIC_BACKUP_ARGS: >-
+        --tag paperless
+        --tag postgres
+        --verbose
+
+      RESTIC_FORGET_ARGS: >-
+        --keep-daily 7
+        --keep-weekly 4
+        --keep-monthly 12
+        
+      PRE_COMMANDS: |-
+        docker stop paperless
+        mkdir -p /dumps
+        docker exec paperless-db pg_dump -U paperless paperless > /dumps/paperless.sql
+
+      POST_COMMANDS_SUCCESS: |-
+        docker start paperless
+
+      POST_COMMANDS_FAILURE: |-
+        docker start paperless
+        echo "Backup FAILED - Paperless restarted, but check restic logs"
+
+      TZ: ${TIME_ZONE}
+  
+  check:
+    image: mazzolino/restic:1.8.2
+    container_name: paperless-check
+    restart: unless-stopped
+    volumes:
+      - ${RESTIC_DATA_DIR}/paperless:/root/.cache/restic
+    environment:
+      CHECK_CRON: "0 0 4 * * 1"
+
+      RESTIC_REPOSITORY: b2:${B2_BUCKET_NAME}
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+      B2_ACCOUNT_ID: ${B2_ACCOUNT_ID}
+      B2_ACCOUNT_KEY: ${B2_ACCOUNT_KEY}
+
+      RESTIC_CHECK_ARGS: >-
+        --verbose
+        --read-data-subset=1/4
+
+      TZ: ${TIME_ZONE}
+
 networks:
   internal:
     driver: bridge
