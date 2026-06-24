@@ -13,6 +13,52 @@ services:
       - ${DATA_DIR}:/data/
     networks:
       - proxy
+
+  restic:
+    image: mazzolino/restic:1.8.2
+    container_name: homebox-restic
+    restart: unless-stopped
+    volumes:
+      - ${DATA_DIR}:/data:ro
+      - ${RESTIC_DATA_DIR}/homebox:/root/.cache/restic
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      BACKUP_CRON: "0 0 2 * * *"
+      PRUNE_CRON: "0 0 3 * * 0"
+      CHECK_CRON: "0 15 4 * * 1"
+      RUN_ON_STARTUP: "true"
+
+      RESTIC_REPOSITORY: b2:${B2_BUCKET_NAME}
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+      B2_ACCOUNT_ID: ${B2_ACCOUNT_ID}
+      B2_ACCOUNT_KEY: ${B2_ACCOUNT_KEY}
+
+      RESTIC_BACKUP_SOURCES: /data
+      RESTIC_BACKUP_ARGS: >-
+        --tag homebox
+        --tag sqlite
+        --verbose
+
+      RESTIC_FORGET_ARGS: >-
+        --keep-daily 7
+        --keep-weekly 4
+        --keep-monthly 12
+
+      RESTIC_CHECK_ARGS: >-
+        --read-data-subset=1/4
+        
+      PRE_COMMANDS: |-
+        docker stop homebox
+
+      POST_COMMANDS_SUCCESS: |-
+        docker start homebox
+
+      POST_COMMANDS_FAILURE: |-
+        docker start homebox
+        echo "Backup FAILED - HomeBox restarted, but check restic logs"
+        
+      TZ: ${TZ}
+
 networks:
   proxy:
     external: true
