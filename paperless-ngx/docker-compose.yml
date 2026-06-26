@@ -12,6 +12,7 @@ services:
     image: docker.io/library/postgres:18.4
     container_name: paperless-db
     restart: unless-stopped
+    command: ["postgres", "-c", "max_connections=200", "-c", "shared_buffers=4GB", "-c", "work_mem=64MB"]
     volumes:
       - ${DATA_DIR}/postgresql:/var/lib/postgresql
     environment:
@@ -39,7 +40,14 @@ services:
       PAPERLESS_URL: https://docs.${DOMAIN}
       PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
       PAPERLESS_OCR_LANGUAGE: eng
+      PAPERLESS_OCR_DESKEW: false
+      PAPERLESS_DATE_ORDER: MDY
       PAPERLESS_TIME_ZONE: ${TIME_ZONE}
+      # Performance tuning for 12 cores / 24 threads / 500GB RAM
+      PAPERLESS_TASK_WORKERS: 16
+      PAPERLESS_THREADS_PER_WORKER: 1
+      OMP_THREAD_LIMIT: 1
+      PAPERLESS_DB_POOLSIZE: 10
     networks:
       - internal
       - proxy
