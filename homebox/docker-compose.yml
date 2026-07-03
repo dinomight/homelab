@@ -18,13 +18,14 @@ services:
     image: mazzolino/restic:1.8.2
     container_name: homebox-backup
     restart: unless-stopped
+    hostname: homebox
     volumes:
       - ${DATA_DIR}:/data:ro
       - ${RESTIC_DATA_DIR}/homebox:/root/.cache/restic
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       BACKUP_CRON: "0 0 2 * * *"
-      RUN_ON_STARTUP: "true"
+      RUN_ON_STARTUP: "false"
 
       RESTIC_REPOSITORY: b2:${B2_BUCKET_NAME}
       RESTIC_PASSWORD: ${RESTIC_PASSWORD}
