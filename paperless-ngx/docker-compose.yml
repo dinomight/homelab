@@ -56,6 +56,7 @@ services:
   backup:
     image: mazzolino/restic:1.8.2
     container_name: paperless-backup
+    hostname: paperless
     restart: unless-stopped
     volumes:
       - ${DATA_DIR}/data:/data:ro
@@ -64,7 +65,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       BACKUP_CRON: "0 0 2 * * *"
-      RUN_ON_STARTUP: "true"
+      RUN_ON_STARTUP: "false"
 
       RESTIC_REPOSITORY: b2:${B2_BUCKET_NAME}
       RESTIC_PASSWORD: ${RESTIC_PASSWORD}
