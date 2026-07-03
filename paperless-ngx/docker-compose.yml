@@ -41,6 +41,7 @@ services:
       PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
       PAPERLESS_OCR_LANGUAGE: eng
       PAPERLESS_OCR_DESKEW: false
+      PAPERLESS_OCR_USER_ARGS: '{"continue_on_soft_render_error": true}'
       PAPERLESS_DATE_ORDER: MDY
       PAPERLESS_TIME_ZONE: ${TIME_ZONE}
       # Performance tuning for 12 cores / 24 threads / 500GB RAM
