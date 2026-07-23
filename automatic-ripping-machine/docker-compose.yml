@@ -1,6 +1,6 @@
 services:
   arm:
-    image: automaticrippingmachine/automatic-ripping-machine:2.23.3
+    image: automaticrippingmachine/automatic-ripping-machine:2.24.1
     container_name: automatic-ripping-machine
     restart: unless-stopped
     privileged: true
