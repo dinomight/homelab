@@ -37,6 +37,8 @@ services:
     environment:
       PAPERLESS_REDIS: redis://broker:6379
       PAPERLESS_DBHOST: db
+      PAPERLESS_DBENGINE: postgresql
+      PAPERLESS_DB_OPTIONS: "pool.max_size=10"
       PAPERLESS_URL: https://docs.${DOMAIN}
       PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
       PAPERLESS_OCR_LANGUAGE: eng
@@ -49,7 +51,6 @@ services:
       PAPERLESS_TASK_WORKERS: 16
       PAPERLESS_THREADS_PER_WORKER: 1
       OMP_THREAD_LIMIT: 1
-      PAPERLESS_DB_POOLSIZE: 10
     networks:
       - internal
       - proxy
