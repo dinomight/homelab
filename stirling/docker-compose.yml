@@ -1,0 +1,21 @@
+services:
+  stirling:
+    image: stirlingtools/stirling-pdf:2.14.3-fat
+    container_name: stirling
+    restart: unless-stopped
+    volumes:
+      - ${DATA_DIR}/configs:/configs
+      - ${DATA_DIR}/logs:/logs
+      - ${DATA_DIR}/pipeline:/pipeline
+      - ${DATA_DIR}/tessdata:/usr/share/tessdata
+    environment:
+      DISABLE_ADDITIONAL_FEATURES: false
+      SECURITY_ENABLELOGIN: true
+      SECURITY_INITIALLOGIN_PASSWORD: ${STIRLING_PASSWORD}
+      SYSTEM_DEFAULTLOCALE: en-US
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

@@ -1,0 +1,15 @@
+http:
+  routers:
+    stirling-pdf:
+      rule: 'Host(`pdf.{{ env "DOMAIN" }}`)'
+      entryPoints:
+        - "websecure"
+      tls:
+        certResolver: "dnsimple"
+      service: "stirling-pdf"
+  services:
+    stirling-pdf:
+      loadBalancer:
+        servers:
+          - url: 'http://stirling:8080'
+        passHostHeader: true
