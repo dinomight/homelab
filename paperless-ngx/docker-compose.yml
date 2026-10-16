@@ -23,7 +23,7 @@ services:
       - internal
 
   webserver:
-    image: ghcr.io/paperless-ngx/paperless-ngx:3.2.1
+    image: ghcr.io/paperless-ngx/paperless-ngx:3.3.2
     restart: unless-stopped
     container_name: paperless
     depends_on:
