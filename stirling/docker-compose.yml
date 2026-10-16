@@ -1,6 +1,6 @@
 services:
   stirling:
-    image: stirlingtools/stirling-pdf:3.0.0-fat
+    image: stirlingtools/stirling-pdf:3.2.0-fat
     container_name: stirling
     restart: unless-stopped
     volumes:
